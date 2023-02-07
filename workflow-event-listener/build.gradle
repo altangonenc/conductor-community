@@ -5,6 +5,7 @@ dependencies {
 
     implementation "com.netflix.conductor:conductor-common:${revConductor}"
     implementation "com.netflix.conductor:conductor-core:${revConductor}"
+    implementation project(':event-queue:conductor-amqp')
 
     compileOnly 'org.springframework.boot:spring-boot-starter'
     compileOnly 'org.springframework.boot:spring-boot-starter-web'

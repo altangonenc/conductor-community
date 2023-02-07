@@ -248,7 +248,7 @@ public class AMQPObservableQueue implements ObservableQueue {
                 .build();
     }
 
-    private void publishMessage(Message message, String exchange, String routingKey) {
+    public void publishMessage(Message message, String exchange, String routingKey) {
         Channel chn = null;
         int retryIndex = 1;
         while (true) {
