@@ -18,6 +18,7 @@ dependencies {
     implementation "com.netflix.conductor:conductor-json-jq-task:${revConductor}"
     implementation "com.netflix.conductor:conductor-awss3-storage:${revConductor}"
     implementation "com.netflix.conductor:conductor-awssqs-event-queue:${revConductor}"
+    implementation "com.lmax:disruptor:${revDisruptor}"
 
     implementation project(':event-queue:conductor-amqp')
     implementation project(':index:conductor-es7-persistence')
