@@ -5,6 +5,8 @@ dependencies {
 
     implementation "com.netflix.conductor:conductor-common:${revConductor}"
     implementation "com.netflix.conductor:conductor-core:${revConductor}"
+    implementation group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: '1.0.0'
+
     implementation project(':event-queue:conductor-amqp')
 
     compileOnly 'org.springframework.boot:spring-boot-starter'

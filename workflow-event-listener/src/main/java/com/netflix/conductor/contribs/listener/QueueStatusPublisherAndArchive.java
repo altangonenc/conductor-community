@@ -11,6 +11,8 @@ import com.netflix.conductor.core.listener.WorkflowStatusListener;
 import com.netflix.conductor.dao.QueueDAO;
 import com.netflix.conductor.metrics.Monitors;
 import com.netflix.conductor.model.WorkflowModel;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,13 +27,32 @@ public class QueueStatusPublisherAndArchive implements WorkflowStatusListener {
     private ExecutionDAOFacade executionDAOFacade;
     private ObjectMapper objectMapper;
 
+    private final Counter notificationSuccessCounter;
+
+    private final Counter notificationFailureCounter;
+
+    private MeterRegistry registry;
+
     public QueueStatusPublisherAndArchive(
             EventQueues eventQueues,
             ExecutionDAOFacade executionDAOFacade,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            MeterRegistry registry) {
         this.eventQueues = eventQueues;
         this.executionDAOFacade = executionDAOFacade;
         this.objectMapper = objectMapper;
+        this.registry = registry;
+        notificationSuccessCounter = registry.counter("notification_success_counter");
+        notificationFailureCounter = registry.counter("notification_failure_counter");
+    }
+
+    public void incrementNotificationSuccessCounter() {
+        notificationSuccessCounter.increment();
+
+    }
+
+    public void incrementNotificationFailureCounter() {
+        notificationFailureCounter.increment();
     }
 
     private static final Logger LOGGER =
@@ -50,11 +71,14 @@ public class QueueStatusPublisherAndArchive implements WorkflowStatusListener {
             LOGGER.info(
                     "Publishing callback of workflow {} on completion", workflow.getWorkflowId());
             queue.publishMessage(workflowToMessage(workflow), EXCHANGE_NAME, COMPLETED_ROUTING_KEY);
+            incrementNotificationSuccessCounter();
         } catch (Exception e) {
             LOGGER.error(
                     "Error when publishing callback of workflow {} on completion",
                     workflow.getWorkflowId());
+            incrementNotificationFailureCounter();
         }
+
 
         try {
             LOGGER.info("Archiving workflow {} on completion ", workflow.getWorkflowId());
@@ -75,11 +99,14 @@ public class QueueStatusPublisherAndArchive implements WorkflowStatusListener {
                     "Publishing callback of workflow {} on termination", workflow.getWorkflowId());
             queue.publishMessage(
                     workflowToMessage(workflow), EXCHANGE_NAME, TERMINATED_ROUTING_KEY);
+            incrementNotificationSuccessCounter();
         } catch (Exception e) {
             LOGGER.error(
                     "Error when publishing callback of workflow {} on termination",
                     workflow.getWorkflowId());
+            incrementNotificationFailureCounter();
         }
+
 
         try {
             LOGGER.info("Archiving workflow {} on completion ", workflow.getWorkflowId());

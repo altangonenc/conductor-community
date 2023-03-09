@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.conductor.core.dal.ExecutionDAOFacade;
 import com.netflix.conductor.core.events.EventQueues;
 import com.netflix.conductor.core.listener.WorkflowStatusListener;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,9 @@ public class QueueStatusPublisherAndArchiveConfiguration {
     public WorkflowStatusListener getWorkflowStatusListener(
             EventQueues eventQueues,
             ExecutionDAOFacade executionDAOFacade,
-            ObjectMapper objectMapper) {
-        return new QueueStatusPublisherAndArchive(eventQueues, executionDAOFacade, objectMapper);
+            ObjectMapper objectMapper,
+            MeterRegistry registry
+    ) {
+        return new QueueStatusPublisherAndArchive(eventQueues, executionDAOFacade, objectMapper ,registry);
     }
 }
